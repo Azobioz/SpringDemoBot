@@ -3,6 +3,7 @@ package com.telegramtest.SpringDemoBot.service;
 import com.telegramtest.SpringDemoBot.config.BotConfig;
 import com.telegramtest.SpringDemoBot.model.User;
 import com.telegramtest.SpringDemoBot.model.UserRepository;
+import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,9 @@ public class TelegramBot extends TelegramLongPollingBot  {
     private UserRepository userRepository;
 
     final BotConfig config;
-    final String helpText = "This bot is create for education purpose \n" +
+    final String helpText = EmojiParser.parseToUnicode("This bot is create for education purpose :snowflake:\n" +
             "Type /start to get welcome message \n" +
-            "Type /help to see this message again";
+            "Type /help to see this message again");
 
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -92,7 +93,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
     }
 
     public void startCommandReceived(long chatId, String name) {
-        String answear = "Hi " + name + ", it's a test bot";
+        String answear = EmojiParser.parseToUnicode("Hi " + name + ", it's a test bot :santa:");
         log.info("Replied to user " + name);
 
         sendMessage(chatId, answear);
