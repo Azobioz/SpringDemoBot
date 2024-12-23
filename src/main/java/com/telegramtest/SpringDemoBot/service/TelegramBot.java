@@ -15,6 +15,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
@@ -60,7 +62,6 @@ public class TelegramBot extends TelegramLongPollingBot  {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
-
             switch (messageText) {
                 case "/start":
                     registerUser(update.getMessage());
@@ -104,12 +105,41 @@ public class TelegramBot extends TelegramLongPollingBot  {
         message.setChatId(chatId);
         message.setText(textToSend);
 
+        ReplyKeyboardMarkup keyboardMarkup = getReplyKeyboardMarkup();
+        message.setReplyMarkup(keyboardMarkup);
+
+
         try {
             execute(message);
         }
         catch (TelegramApiException e) {
             log.error("Error: " + e.getMessage());
         }
+    }
+
+    private ReplyKeyboardMarkup getReplyKeyboardMarkup() {
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        KeyboardRow row = new KeyboardRow();
+
+        row.add("Days left to christmas");
+        row.add("Get random number");
+
+        keyboardRows.add(row);
+
+        row = new KeyboardRow();
+
+        row.add("Get random phrases");
+        row.add("Check my data");
+        row.add("Delete my data");
+
+        keyboardRows.add(row);
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+        return keyboardMarkup;
     }
 
     @Override
