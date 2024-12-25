@@ -198,7 +198,6 @@ public class TelegramBot extends TelegramLongPollingBot  {
 
         yesButton.setText("Yes");
         yesButton.setCallbackData("YES_BUTTON"); //если пользователь нажмет Yes, то значение callbackData будет YES_BUTTON
-
         InlineKeyboardButton noButton = new InlineKeyboardButton();
         noButton.setText("No");
         noButton.setCallbackData("NO_BUTTON");
