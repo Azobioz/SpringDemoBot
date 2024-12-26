@@ -27,7 +27,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Component
 @Slf4j
@@ -40,6 +39,11 @@ public class TelegramBot extends TelegramLongPollingBot  {
     final String helpText = EmojiParser.parseToUnicode("This bot is create for education purpose :snowflake:\n" +
             "Type /start to get welcome message \n" +
             "Type /help to see this message again");
+
+    static final String YES_BUTTON = "YES_BUTTON";
+    static final String NO_BUTTON = "NO_BUTTON";
+
+    static final String ERROR = "Error: ";
 
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -95,33 +99,11 @@ public class TelegramBot extends TelegramLongPollingBot  {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-            if (callBackData.equals("YES_BUTTON")) {
-                String text = "You pressed Yes button";
-                EditMessageText editedMessageText = new EditMessageText();
-                editedMessageText.setChatId(chatId);
-                editedMessageText.setText(text);
-                editedMessageText.setMessageId(messageId);
-                try {
-                    execute(editedMessageText);
-                }
-                catch (TelegramApiException e) {
-                    log.error("Error: " + e.getMessage());
-                }
-
+            if (callBackData.equals(YES_BUTTON)) {
+                executeEditedMessage(chatId, "You pressed yes", messageId);
             }
-            else if (callBackData.equals("NO_BUTTON")) {
-                String text = "You pressed No button";
-                EditMessageText editedMessageText = new EditMessageText();
-                editedMessageText.setChatId(chatId);
-                editedMessageText.setText(text);
-                editedMessageText.setMessageId(messageId);
-
-                try {
-                    execute(editedMessageText);
-                }
-                catch (TelegramApiException e) {
-                    log.error("Error: " + e.getMessage());
-                }
+            else if (callBackData.equals(NO_BUTTON)) {
+               executeEditedMessage(chatId, "You pressed no", messageId);
             }
 
         }
@@ -150,6 +132,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
     }
 
     private void sendMessage(long chatId, String textToSend) {
+
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(textToSend);
@@ -157,12 +140,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
         ReplyKeyboardMarkup keyboardMarkup = getReplyKeyboardMarkup();
         message.setReplyMarkup(keyboardMarkup);
 
-        try {
-            execute(message);
-        }
-        catch (TelegramApiException e) {
-            log.error("Error: " + e.getMessage());
-        }
+        executeMessage(message);
     }
 
     private ReplyKeyboardMarkup getReplyKeyboardMarkup() {
@@ -199,7 +177,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText("Do your really want to register?");
+        message.setText("Do you really want to register");
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup(); //Встроенная разметка клавиатуры
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>(); //Список строк кнопок под текстом
@@ -207,12 +185,12 @@ public class TelegramBot extends TelegramLongPollingBot  {
         InlineKeyboardButton yesButton = new InlineKeyboardButton(); //кнопка
 
         yesButton.setText("Yes");
-        yesButton.setCallbackData("YES_BUTTON"); //если пользователь нажмет Yes, то значение callbackData будет YES_BUTTON
+        yesButton.setCallbackData(YES_BUTTON); //если пользователь нажмет Yes, то значение callbackData будет YES_BUTTON
         InlineKeyboardButton noButton = new InlineKeyboardButton();
         noButton.setText("No");
-        noButton.setCallbackData("NO_BUTTON");
+        noButton.setCallbackData(NO_BUTTON);
 
-        rowInline.add(yesButton); //доабавляется в строку кнопок
+        rowInline.add(yesButton); //добавляется в строку кнопок
         rowInline.add(noButton);
 
         rowsInLine.add(rowInline);
@@ -220,18 +198,37 @@ public class TelegramBot extends TelegramLongPollingBot  {
         markupInline.setKeyboard(rowsInLine);
         message.setReplyMarkup(markupInline); // когда будет отправлено юзеру, то он получит кнопки под текстом
 
-        try {
-            execute(message);
-        }
-        catch (TelegramApiException e) {
-            log.error("Error: " + e.getMessage());
-        }
+        executeMessage(message);
     }
 
     @Override
     public String getBotUsername() {
         return config.getBotName();
     }
+
+    private void executeEditedMessage(Long chatId, String text, Integer messageId) {
+        EditMessageText editedMessageText = new EditMessageText();
+        editedMessageText.setChatId(chatId);
+        editedMessageText.setText(text);
+        editedMessageText.setMessageId(messageId);
+        try {
+            execute(editedMessageText);
+        }
+        catch (TelegramApiException e) {
+            log.error(ERROR + e.getMessage());
+        }
+    }
+
+    private void executeMessage(SendMessage message) {
+        try {
+            execute(message);
+        }
+        catch (TelegramApiException e) {
+            log.error(ERROR + e.getMessage());
+        }
+    }
+
+
 
 
 
