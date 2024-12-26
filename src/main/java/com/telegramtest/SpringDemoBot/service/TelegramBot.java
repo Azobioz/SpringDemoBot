@@ -64,20 +64,30 @@ public class TelegramBot extends TelegramLongPollingBot  {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
-            switch (messageText) {
-                case "/start":
-                    registerUser(update.getMessage());
-                    startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-                    break;
-                case "/help":
-                    sendMessage(chatId, helpText);
-                    break;
-                case "/register":
-                    register(chatId);
-                    break;
-                default:
-                    sendMessage(chatId, "Command not found");
-                    break;
+            if (messageText.contains("/send") && config.getOwnerId() == chatId) {
+                String textToSend = EmojiParser.parseToUnicode(messageText.substring(messageText.indexOf(" ") + 1));
+                Iterable<User> users = userRepository.findAll();
+                for (User user : users) {
+                    sendMessage(user.getChatId(), textToSend);
+                }
+            }
+            else {
+                switch (messageText) {
+                    case "/start":
+                        registerUser(update.getMessage());
+                        startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
+                        break;
+                    case "/help":
+                        sendMessage(chatId, helpText);
+                        break;
+                    case "/register":
+                        register(chatId);
+                        break;
+                    default:
+                        sendMessage(chatId, "Command not found");
+                        break;
+
+                }
             }
         }
         else if (update.hasCallbackQuery()) {
