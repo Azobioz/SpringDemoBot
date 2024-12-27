@@ -1,12 +1,15 @@
 package com.telegramtest.SpringDemoBot.service;
 
 import com.telegramtest.SpringDemoBot.config.BotConfig;
+import com.telegramtest.SpringDemoBot.model.Ads;
+import com.telegramtest.SpringDemoBot.model.AdsRepository;
 import com.telegramtest.SpringDemoBot.model.User;
 import com.telegramtest.SpringDemoBot.model.UserRepository;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -34,6 +37,8 @@ public class TelegramBot extends TelegramLongPollingBot  {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AdsRepository adsRepository;
 
     final BotConfig config;
     final String helpText = EmojiParser.parseToUnicode("This bot is create for education purpose :snowflake:\n" +
@@ -226,6 +231,20 @@ public class TelegramBot extends TelegramLongPollingBot  {
         catch (TelegramApiException e) {
             log.error(ERROR + e.getMessage());
         }
+    }
+
+    @Scheduled(cron = "${cron.scheduler}")
+    private void sendAds() {
+
+        Iterable<Ads> ads = adsRepository.findAll();
+        Iterable<User> users = userRepository.findAll();
+
+        for (Ads ad : ads) {
+            for (User user : users) {
+                sendMessage(user.getChatId(), ad.getAd());
+            }
+        }
+
     }
 
 
